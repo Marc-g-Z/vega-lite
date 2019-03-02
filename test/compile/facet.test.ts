@@ -220,7 +220,7 @@ describe('FacetModel', () => {
       });
       const layout = model.assembleLayout();
       expect(layout).toEqual({
-        padding: {row: DEFAULT_SPACING, column: DEFAULT_SPACING},
+        padding: DEFAULT_SPACING,
         columns: {
           signal: "length(data('column_domain'))"
         },
@@ -248,7 +248,7 @@ describe('FacetModel', () => {
       });
       const layout = model.assembleLayout();
       expect(layout).toEqual({
-        padding: {row: DEFAULT_SPACING, column: DEFAULT_SPACING},
+        padding: DEFAULT_SPACING,
         columns: {
           signal: "length(data('column_domain'))"
         },
@@ -276,7 +276,7 @@ describe('FacetModel', () => {
       });
       const layout = model.assembleLayout();
       expect(layout).toEqual({
-        padding: {row: DEFAULT_SPACING, column: DEFAULT_SPACING},
+        padding: DEFAULT_SPACING,
         columns: 1,
         bounds: 'full',
         align: 'none'
@@ -303,6 +303,27 @@ describe('FacetModel', () => {
       } as any);
       const layout = model.child.assembleLayout();
       expect(layout).not.toHaveProperty('columns');
+    });
+
+    it('correctly applies columns config.', () => {
+      const model = parseFacetModelWithScale({
+        facet: {field: 'a', type: 'ordinal'},
+        spec: {
+          facet: {
+            column: {field: 'c', type: 'ordinal'}
+          },
+          spec: {
+            mark: 'point',
+            encoding: {
+              x: {field: 'b', type: 'quantitative'}
+            }
+          }
+        },
+        config: {facet: {columns: 3}}
+        // TODO: remove "any" once we support all facet listed in https://github.com/vega/vega-lite/issues/2760
+      } as any);
+
+      expect(model.layout).toMatchObject({columns: 3});
     });
 
     it('returns a layout with header band if child spec is also a facet', () => {

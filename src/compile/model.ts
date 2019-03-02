@@ -1,5 +1,5 @@
 import {AnchorValue, Axis as VgAxis, Legend as VgLegend, NewSignal, SignalRef, Title as VgTitle} from 'vega';
-import {isNumber, isString} from 'vega-util';
+import {isString} from 'vega-util';
 import {Channel, FACET_CHANNELS, isChannel, isScaleChannel, ScaleChannel, SingleDefChannel} from '../channel';
 import {Config} from '../config';
 import {Data, DataSourceType} from '../data';
@@ -9,7 +9,7 @@ import * as log from '../log';
 import {Resolve} from '../resolve';
 import {hasDiscreteDomain} from '../scale';
 import {isFacetSpec, isLayerSpec, isUnitSpec} from '../spec';
-import {DEFAULT_SPACING, extractCompositionLayout, GenericCompositionLayout, ViewBackground} from '../spec/base';
+import {extractCompositionLayout, GenericCompositionLayout, SpecType, ViewBackground} from '../spec/base';
 import {NormalizedSpec} from '../spec/index';
 import {extractTitleConfig, TitleParams} from '../title';
 import {normalizeTransform, Transform} from '../transform';
@@ -135,7 +135,6 @@ export function isLayerModel(model: Model): model is LayerModel {
 }
 
 export abstract class Model {
-  public abstract readonly type: 'unit' | 'facet' | 'layer' | 'concat' | 'repeat';
   public readonly name: string;
 
   public readonly title: TitleParams;
@@ -160,6 +159,7 @@ export abstract class Model {
 
   constructor(
     spec: NormalizedSpec,
+    public readonly type: SpecType,
     public readonly parent: Model,
     parentGivenName: string,
     public readonly config: Config,
@@ -184,7 +184,7 @@ export abstract class Model {
 
     this.description = spec.description;
     this.transforms = normalizeTransform(spec.transform || []);
-    this.layout = isUnitSpec(spec) || isLayerSpec(spec) ? {} : extractCompositionLayout(spec);
+    this.layout = isUnitSpec(spec) || isLayerSpec(spec) ? {} : extractCompositionLayout(spec, type, config);
 
     this.component = {
       data: {
@@ -336,12 +336,7 @@ export abstract class Model {
     const {spacing = {}, ...layout} = this.layout;
 
     return {
-      padding: isNumber(spacing)
-        ? spacing
-        : {
-            row: spacing.row || DEFAULT_SPACING,
-            column: spacing.column || DEFAULT_SPACING
-          },
+      padding: spacing,
       ...this.assembleDefaultLayout(),
       ...layout
     };
