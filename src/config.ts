@@ -269,6 +269,9 @@ const MARK_STYLES = ['view', ...PRIMITIVE_MARKS] as ('view' | Mark)[];
 
 const VL_ONLY_CONFIG_PROPERTIES: (keyof Config)[] = [
   'padding',
+  'facet',
+  'concat',
+  'repeat',
   'numberFormat',
   'timeFormat',
   'countTitle',
